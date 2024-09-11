@@ -37,6 +37,7 @@ object FrmMain: TFrmMain
     Caption = 'pnlLeft'
     ShowCaption = False
     TabOrder = 0
+    ExplicitHeight = 174
     object lblPort: TLabel
       Left = 8
       Top = 19
@@ -83,6 +84,8 @@ object FrmMain: TFrmMain
     Caption = 'Panel1'
     ShowCaption = False
     TabOrder = 1
+    ExplicitWidth = 757
+    ExplicitHeight = 174
     object Panel7: TPanel
       Left = 0
       Top = 0
@@ -93,6 +96,7 @@ object FrmMain: TFrmMain
       Caption = 'Panel7'
       ShowCaption = False
       TabOrder = 0
+      ExplicitWidth = 757
       object Label2: TLabel
         Left = 10
         Top = 2
@@ -143,6 +147,8 @@ object FrmMain: TFrmMain
       Caption = 'Panel10'
       ShowCaption = False
       TabOrder = 1
+      ExplicitWidth = 757
+      ExplicitHeight = 149
       object imgMultipartFormDataStream: TImage
         AlignWithMargins = True
         Left = 10

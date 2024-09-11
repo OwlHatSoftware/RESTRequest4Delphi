@@ -1,29 +1,28 @@
-object FrmMain: TFrmMain
+object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'REST Request - Samples'
-  ClientHeight = 561
-  ClientWidth = 984
+  Caption = 'Form1'
+  ClientHeight = 535
+  ClientWidth = 830
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
   Font.Style = []
-  Position = poScreenCenter
   OnCreate = FormCreate
-  TextHeight = 13
+  TextHeight = 15
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 984
+    Width = 830
     Height = 78
     Align = alTop
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 978
+    ExplicitWidth = 824
     object Image1: TImage
       AlignWithMargins = True
       Left = 10
@@ -5224,7 +5223,7 @@ object FrmMain: TFrmMain
       ExplicitHeight = 97
     end
     object Panel8: TPanel
-      Left = 744
+      Left = 590
       Top = 0
       Width = 240
       Height = 78
@@ -5232,12 +5231,12 @@ object FrmMain: TFrmMain
       Caption = 'Panel8'
       ShowCaption = False
       TabOrder = 0
-      ExplicitLeft = 738
+      ExplicitLeft = 584
       object lblRESTRequest4DelphiComponent: TLabel
         Left = 1
         Top = 1
         Width = 238
-        Height = 13
+        Height = 15
         Align = alTop
         ExplicitWidth = 3
       end
@@ -5246,17 +5245,17 @@ object FrmMain: TFrmMain
   object Panel2: TPanel
     Left = 0
     Top = 78
-    Width = 984
-    Height = 483
+    Width = 830
+    Height = 457
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitWidth = 978
-    ExplicitHeight = 466
+    ExplicitWidth = 824
+    ExplicitHeight = 440
     object Splitter1: TSplitter
       Left = 0
       Top = 209
-      Width = 984
+      Width = 830
       Height = 8
       Cursor = crVSplit
       Align = alTop
@@ -5267,17 +5266,17 @@ object FrmMain: TFrmMain
     object Panel3: TPanel
       Left = 0
       Top = 217
-      Width = 984
-      Height = 266
+      Width = 830
+      Height = 240
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitWidth = 978
-      ExplicitHeight = 249
+      ExplicitWidth = 824
+      ExplicitHeight = 223
       object Panel6: TPanel
         Left = 0
         Top = 0
-        Width = 984
+        Width = 830
         Height = 22
         Align = alTop
         Alignment = taLeftJustify
@@ -5292,10 +5291,10 @@ object FrmMain: TFrmMain
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitWidth = 978
+        ExplicitWidth = 824
         object lblStatusCode: TLabel
           AlignWithMargins = True
-          Left = 976
+          Left = 822
           Top = 2
           Width = 3
           Height = 20
@@ -5309,7 +5308,7 @@ object FrmMain: TFrmMain
         end
         object Label3: TLabel
           AlignWithMargins = True
-          Left = 903
+          Left = 749
           Top = 2
           Width = 68
           Height = 20
@@ -5326,8 +5325,8 @@ object FrmMain: TFrmMain
       object PageControl2: TPageControl
         Left = 0
         Top = 22
-        Width = 984
-        Height = 244
+        Width = 830
+        Height = 218
         ActivePage = TabSheet6
         Align = alClient
         Font.Charset = ANSI_CHARSET
@@ -5337,20 +5336,20 @@ object FrmMain: TFrmMain
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitWidth = 978
-        ExplicitHeight = 227
+        ExplicitWidth = 824
+        ExplicitHeight = 201
         object TabSheet6: TTabSheet
           Caption = 'Body'
           ImageIndex = 1
           object mmBody: TMemo
             Left = 0
             Top = 0
-            Width = 976
-            Height = 214
+            Width = 822
+            Height = 188
             Align = alClient
             TabOrder = 0
-            ExplicitWidth = 970
-            ExplicitHeight = 197
+            ExplicitWidth = 816
+            ExplicitHeight = 171
           end
         end
       end
@@ -5358,16 +5357,16 @@ object FrmMain: TFrmMain
     object Panel4: TPanel
       Left = 0
       Top = 0
-      Width = 984
+      Width = 830
       Height = 209
       Align = alTop
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitWidth = 978
+      ExplicitWidth = 824
       object Panel5: TPanel
         Left = 0
         Top = 0
-        Width = 984
+        Width = 830
         Height = 22
         Align = alTop
         Alignment = taLeftJustify
@@ -5382,12 +5381,12 @@ object FrmMain: TFrmMain
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitWidth = 978
+        ExplicitWidth = 824
       end
       object PageControl1: TPageControl
         Left = 0
         Top = 22
-        Width = 984
+        Width = 830
         Height = 187
         ActivePage = TabSheet1
         Align = alClient
@@ -5398,11 +5397,11 @@ object FrmMain: TFrmMain
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitWidth = 978
+        ExplicitWidth = 824
         object TabSheet1: TTabSheet
           Caption = 'Request'
           DesignSize = (
-            976
+            822
             157)
           object Label1: TLabel
             Left = 10
@@ -5411,38 +5410,36 @@ object FrmMain: TFrmMain
             Height = 15
             Caption = 'Custom body:'
           end
-          object edtBaseURL: TLabeledEdit
+          object edtPipeServer: TLabeledEdit
             Left = 10
             Top = 24
-            Width = 648
+            Width = 343
             Height = 23
             Anchors = [akLeft, akTop, akRight]
-            EditLabel.Width = 24
+            EditLabel.Width = 58
             EditLabel.Height = 15
-            EditLabel.Caption = 'URL:'
+            EditLabel.Caption = 'PipeServer:'
             TabOrder = 0
-            Text = 'http://localhost:8888/users'
-            TextHint = 'http://localhost:8888/users'
-            ExplicitWidth = 642
+            Text = ''
+            ExplicitWidth = 337
           end
-          object edtAccept: TLabeledEdit
-            Left = 664
+          object edtPipeName: TLabeledEdit
+            Left = 384
             Top = 24
-            Width = 219
+            Width = 345
             Height = 23
             Anchors = [akTop, akRight]
-            EditLabel.Width = 40
+            EditLabel.Width = 58
             EditLabel.Height = 15
-            EditLabel.Caption = 'Accept:'
+            EditLabel.Caption = 'PipeName:'
             TabOrder = 1
-            Text = 'application/json'
-            TextHint = 'application/json'
-            ExplicitLeft = 658
+            Text = ''
+            ExplicitLeft = 378
           end
           object mmCustomBody: TMemo
             Left = 10
             Top = 74
-            Width = 873
+            Width = 719
             Height = 71
             Anchors = [akLeft, akTop, akRight]
             Lines.Strings = (
@@ -5450,10 +5447,10 @@ object FrmMain: TFrmMain
                 '{"name":"Vinicius","lastName":"Sanchez","email":"vinicius@fioril' +
                 'li.com.br"}')
             TabOrder = 2
-            ExplicitWidth = 867
+            ExplicitWidth = 713
           end
           object btnDELETE: TButton
-            Left = 895
+            Left = 741
             Top = 120
             Width = 72
             Height = 25
@@ -5461,10 +5458,10 @@ object FrmMain: TFrmMain
             Caption = 'DELETE'
             TabOrder = 3
             OnClick = btnDELETEClick
-            ExplicitLeft = 889
+            ExplicitLeft = 735
           end
           object btnPUT: TButton
-            Left = 895
+            Left = 741
             Top = 87
             Width = 72
             Height = 25
@@ -5472,10 +5469,10 @@ object FrmMain: TFrmMain
             Caption = 'PUT'
             TabOrder = 4
             OnClick = btnPUTClick
-            ExplicitLeft = 889
+            ExplicitLeft = 735
           end
           object btnPOST: TButton
-            Left = 895
+            Left = 741
             Top = 56
             Width = 72
             Height = 25
@@ -5483,10 +5480,10 @@ object FrmMain: TFrmMain
             Caption = 'POST'
             TabOrder = 5
             OnClick = btnPOSTClick
-            ExplicitLeft = 889
+            ExplicitLeft = 735
           end
           object btnGET: TButton
-            Left = 895
+            Left = 741
             Top = 24
             Width = 72
             Height = 25
@@ -5494,7 +5491,7 @@ object FrmMain: TFrmMain
             Caption = 'GET'
             TabOrder = 6
             OnClick = btnGETClick
-            ExplicitLeft = 889
+            ExplicitLeft = 735
           end
         end
         object TabSheet2: TTabSheet
@@ -5503,7 +5500,7 @@ object FrmMain: TFrmMain
           object Panel7: TPanel
             Left = 0
             Top = 54
-            Width = 976
+            Width = 822
             Height = 25
             Align = alTop
             BevelOuter = bvNone
@@ -5511,7 +5508,7 @@ object FrmMain: TFrmMain
             ShowCaption = False
             TabOrder = 0
             DesignSize = (
-              976
+              822
               25)
             object Label2: TLabel
               Left = 10
@@ -5553,20 +5550,19 @@ object FrmMain: TFrmMain
               ParentFont = False
             end
             object btnMultipartFormDataPut: TButton
-              Left = 895
+              Left = 741
               Top = 0
               Width = 72
               Height = 25
               Anchors = [akTop, akRight]
               Caption = 'PUT'
               TabOrder = 0
-              OnClick = btnMultipartFormDataPutClick
             end
           end
           object Panel9: TPanel
             Left = 0
             Top = 0
-            Width = 976
+            Width = 822
             Height = 54
             Align = alTop
             BevelOuter = bvNone
@@ -5574,22 +5570,21 @@ object FrmMain: TFrmMain
             ShowCaption = False
             TabOrder = 1
             DesignSize = (
-              976
+              822
               54)
             object btnMultipartFormDataPost: TButton
-              Left = 895
+              Left = 741
               Top = 23
               Width = 72
               Height = 25
               Anchors = [akTop, akRight]
               Caption = 'POST'
               TabOrder = 0
-              OnClick = btnMultipartFormDataPostClick
             end
             object edtMultipartFormDataBaseURL: TLabeledEdit
               Left = 10
               Top = 24
-              Width = 870
+              Width = 716
               Height = 23
               Anchors = [akLeft, akTop, akRight]
               EditLabel.Width = 24
@@ -5603,7 +5598,7 @@ object FrmMain: TFrmMain
           object Panel10: TPanel
             Left = 0
             Top = 79
-            Width = 976
+            Width = 822
             Height = 78
             Align = alClient
             BevelOuter = bvNone

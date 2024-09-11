@@ -46,18 +46,23 @@ implementation
 
 uses
   {$IF DEFINED(FPC) and (not DEFINED(RR4D_INDY)) and (not DEFINED(RR4D_SYNAPSE))}
-    RESTRequest4D.Request.FPHTTPClient;
+    RESTRequest4D.Request.FPHTTPClient
   {$ELSEIF DEFINED(RR4D_INDY)}
-    RESTRequest4D.Request.Indy;
+    RESTRequest4D.Request.Indy
   {$ELSEIF DEFINED(RR4D_NETHTTP)}
-    RESTRequest4D.Request.NetHTTP;
+    RESTRequest4D.Request.NetHTTP
   {$ELSEIF DEFINED(RR4D_SYNAPSE)}
-    RESTRequest4D.Request.Synapse;
+    RESTRequest4D.Request.Synapse
   {$ELSEIF DEFINED(RR4D_ICS)}
-    RESTRequest4D.Request.ICS;
+    RESTRequest4D.Request.ICS
   {$ELSE}
-    RESTRequest4D.Request.Client;
+    {$IF DEFINED(RR4D_CLIENT)}
+      RESTRequest4D.Request.Client
+    {$ELSEIF DEFINED(RR4D_PIPES)}
+      RESTRequest4D.Request.PipesClient
+    {$ENDIF}
   {$ENDIF}
+  ;
 
 class function TRequest.New: IRequest;
 begin
@@ -72,7 +77,11 @@ begin
   {$ELSEIF DEFINED(RR4D_ICS)}
     Result := TRequestICS.New;
   {$ELSE}
+    {$IF DEFINED(RR4D_CLIENT)}
     Result := TRequestClient.New;
+    {$ELSEIF DEFINED(RR4D_PIPES)}
+     Result := TRequestPipes.New;
+     {$ENDIF}
   {$ENDIF}
 end;
 

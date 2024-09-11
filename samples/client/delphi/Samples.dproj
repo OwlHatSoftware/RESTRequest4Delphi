@@ -85,6 +85,7 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <DCC_UnitSearchPath>..\..\..\src;..\..\..\modules\dataset-serialize\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_Define>RR4D_CLIENT;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -125,11 +126,14 @@
                 <Source>
                     <Source Name="MainSource">Samples.dpr</Source>
                 </Source>
-                <Excluded_Packages/>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="4">
                 <DeployFile LocalName="Bin\Samples.exe" Configuration="Debug" Class="ProjectOutput"/>
-                <DeployFile LocalName="Bin\Samples.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="Samples.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>Samples.exe</RemoteName>
                         <Overwrite>true</Overwrite>
@@ -793,9 +797,6 @@
                         <Operation>1</Operation>
                     </Platform>
                     <Platform Name="Win64">
-                        <Operation>1</Operation>
-                    </Platform>
-                    <Platform Name="Win64x">
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>

@@ -34,6 +34,7 @@ type
     function Adapters: TArray<IRequestAdapter>; overload;
     function BaseURL(const ABaseURL: string): IRequest; overload;
     function BaseURL: string; overload;
+    function PipeServer(const AServerName, ANamedPipe: string): IRequest;
     function Resource(const AResource: string): IRequest; overload;
     function Resource: string; overload;
     function ResourceSuffix(const AResourceSuffix: string): IRequest; overload;
@@ -497,6 +498,12 @@ begin
   DoBeforeExecute(FRESTRequest);
   FRESTRequest.Method := TRESTRequestMethod.rmPATCH;
   ExecuteRequest;
+end;
+
+function TRequestClient.PipeServer(const AServerName,
+  ANamedPipe: string): IRequest;
+begin
+
 end;
 
 function TRequestClient.Post: IResponse;

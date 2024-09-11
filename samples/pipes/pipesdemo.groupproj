@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{3D57E39E-D1F5-452B-8570-5798549F49AE}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="pipesclient\pipesclient.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="pipesserver\pipesserver.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="pipesclient">
+        <MSBuild Projects="pipesclient\pipesclient.dproj"/>
+    </Target>
+    <Target Name="pipesclient:Clean">
+        <MSBuild Projects="pipesclient\pipesclient.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="pipesclient:Make">
+        <MSBuild Projects="pipesclient\pipesclient.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="pipesserver">
+        <MSBuild Projects="pipesserver\pipesserver.dproj"/>
+    </Target>
+    <Target Name="pipesserver:Clean">
+        <MSBuild Projects="pipesserver\pipesserver.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="pipesserver:Make">
+        <MSBuild Projects="pipesserver\pipesserver.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="pipesclient;pipesserver"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="pipesclient:Clean;pipesserver:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="pipesclient:Make;pipesserver:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
