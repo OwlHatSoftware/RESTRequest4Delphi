@@ -56,7 +56,7 @@ type
       : IRequest; overload;
     function Adapters: TArray<IRequestAdapter>; overload;
     function Endpoint(const AEndPoint: string): IRequest;
-    function PipeServer(const AServerName, ANamedPipe: string): IRequest;
+    function PipeServer(const ANamedPipe: string): IRequest;
     function OnBeforeExecute(const AOnBeforeExecute
       : TRR4DCallbackOnBeforeExecute): IRequest;
     function OnAfterExecute(const AOnAfterExecute: TRR4DCallbackOnAfterExecute)
@@ -98,8 +98,8 @@ type
     // property OnCallBack: TCallBackFunction read FCallBack write FCallBack;
   end;
 
-  var
-    FClassInstance: TRequestPipes;
+var
+  FClassInstance: TRequestPipes;
 
 implementation
 
@@ -107,19 +107,19 @@ uses superobject, supertypes;
 
 function InitPipeClient(PipeName: PAnsiChar; CallBack: TCallBackFunction)
   : PAnsiChar; register; stdcall; external('PipeClient.dll');
+procedure DonePipeClient; register; stdcall; external('PipeClient.dll');
 function ConnectPipeClient(WaitTime: integer): Boolean; register; stdcall;
   external('PipeClient.dll');
-procedure PipeClientMessageToServer(Msg: PAnsiChar); register; stdcall;
-  external('PipeClient.dll');
+procedure PipeClientMessageToServer(Msg: PAnsiChar; ATimeOut: integer = 20000);
+  register; stdcall; external('PipeClient.dll');
 
 function CallBack(msgType: integer; var pipeID: integer; var answer: PAnsiChar;
   var param: DWORD): Boolean; stdcall;
 begin
   Result := False;
-  if not Assigned(FClassInstance)  then
+  if not Assigned(FClassInstance) then
     Exit;
-  result := FClassInstance.DoCallBack(msgType, pipeID,
-    answer, param);
+  Result := FClassInstance.DoCallBack(msgType, pipeID, answer, param);
 end;
 
 { TFile }
@@ -142,19 +142,19 @@ end;
 
 function TRequestPipes.Adapters: TArray<IRequestAdapter>;
 begin
-  result := FAdapters;
+  Result := FAdapters;
 end;
 
 function TRequestPipes.Adapters(const AAdapters: TArray<IRequestAdapter>)
   : IRequest;
 begin
   FAdapters := AAdapters;
-  result := Self;
+  Result := Self;
 end;
 
 function TRequestPipes.Adapters(const AAdapter: IRequestAdapter): IRequest;
 begin
-  result := Adapters([AAdapter]);
+  Result := Adapters([AAdapter]);
 end;
 
 function TRequestPipes.AddBody(const AContent: TObject; const AOwns: Boolean)
@@ -172,7 +172,7 @@ begin
   LJSONObject := TJson.ObjectToJsonObject(AContent);
 {$ENDIF}
   try
-    result := Self.AddBody(LJSONObject, False);
+    Result := Self.AddBody(LJSONObject, False);
   finally
 {$IFDEF FPC}
     LJSONStreamer.Free;
@@ -192,7 +192,7 @@ end;
 function TRequestPipes.AddBody(const AContent: TStream; const AOwns: Boolean)
   : IRequest;
 begin
-  result := Self;
+  Result := Self;
   try
     TstringStream(FStreamSend).CopyFrom(AContent, AContent.Size);
     FStreamSend.Position := 0;
@@ -207,8 +207,8 @@ function TRequestPipes.AddFile(const AFieldName: string; const AValue: TStream;
 var
   LFile: TFile;
 begin
-  result := Self;
-  if not assigned(AValue) then
+  Result := Self;
+  if not Assigned(AValue) then
     Exit;
   if (AValue <> Nil) and (AValue.Size > 0) then
   begin
@@ -219,23 +219,23 @@ end;
 
 function TRequestPipes.AddHeader(const AName, AValue: string): IRequest;
 begin
-  result := Self;
+  Result := Self;
 end;
 
 function TRequestPipes.AddParam(const AName, AValue: string): IRequest;
 begin
-  result := Self;
+  Result := Self;
 end;
 
 procedure TRequestPipes.AfterExcecute;
 begin
-  if assigned(FClassInstance) then
+  if Assigned(FClassInstance) then
     FClassInstance.DoAfterExecute(FClassInstance, FResponse);
 end;
 
 function TRequestPipes.AddBody(const AContent: string): IRequest;
 begin
-  result := Self;
+  Result := Self;
   TstringStream(FStreamSend).Writestring(AContent);
   FStreamSend.Position := 0;
 end;
@@ -244,9 +244,9 @@ function TRequestPipes.AddBody(const AContent: TJSONArray; const AOwns: Boolean)
   : IRequest;
 begin
 {$IFDEF FPC}
-  result := Self.AddBody(AContent.AsJSON);
+  Result := Self.AddBody(AContent.AsJSON);
 {$ELSE}
-  result := Self.AddBody(AContent.ToJSON);
+  Result := Self.AddBody(AContent.ToJSON);
 {$ENDIF}
   if AOwns then
   begin
@@ -262,9 +262,9 @@ function TRequestPipes.AddBody(const AContent: TJSONObject;
   const AOwns: Boolean): IRequest;
 begin
 {$IFDEF FPC}
-  result := Self.AddBody(AContent.AsJSON);
+  Result := Self.AddBody(AContent.AsJSON);
 {$ELSE}
-  result := Self.AddBody(AContent.ToJSON);
+  Result := Self.AddBody(AContent.ToJSON);
 {$ENDIF}
   if AOwns then
   begin
@@ -281,7 +281,7 @@ function TRequestPipes.AddFile(const AFieldName, AFileName,
 var
   LStream: TMemoryStream;
 begin
-  result := Self;
+  Result := Self;
   if not FileExists(AFileName) then
     Exit;
   LStream := TMemoryStream.Create;
@@ -296,7 +296,7 @@ end;
 
 function TRequestPipes.ClearBody: IRequest;
 begin
-  result := Self;
+  Result := Self;
   FStreamSend.Position := 0;
   FStreamSend.Size := 0;
 end;
@@ -307,17 +307,19 @@ begin
   FConnected := False;
   FStreamSend := TstringStream.Create('', TEncoding.UTF8);
   FFiles := TDictionary<string, TFile>.Create;
+  FServerName := '';
   // FCallBack := DoCallBack;
 end;
 
 function TRequestPipes.Delete: IResponse;
 begin
   ExecuteRequest(mrDELETE);
-  result := FResponse;
+  Result := FResponse;
 end;
 
 destructor TRequestPipes.Destroy;
 begin
+  DonePipeClient;
   FreeAndNil(FFiles);
   FreeAndNil(FStreamSend);
   inherited;
@@ -328,7 +330,7 @@ procedure TRequestPipes.DoAfterExecute(const Sender: TObject;
 var
   LAdapter: IRequestAdapter;
 begin
-  if assigned(FOnAfterExecute) then
+  if Assigned(FOnAfterExecute) then
     FOnAfterExecute(Self, FResponse);
   for LAdapter in FAdapters do
     LAdapter.Execute(FResponse.Content);
@@ -336,7 +338,7 @@ end;
 
 procedure TRequestPipes.DoBeforeExecute;
 begin
-  if assigned(FOnBeforeExecute) then
+  if Assigned(FOnBeforeExecute) then
     FOnBeforeExecute(Self);
 end;
 
@@ -350,7 +352,7 @@ var
   Json: ISuperObject;
   jsonarray: TSuperArray;
 begin
-  result := True;
+  Result := True;
   pid := pipeID;
   s := System.AnsiStrings.StrPas(answer);
   p := param;
@@ -374,12 +376,12 @@ begin
         begin
           m := 'MSG_PIPEMESSAGE';
           Json := TSuperObject.ParseString(PSOChar(WideString(s)), True);
-          if not assigned(Json) then
+          if not Assigned(Json) then
             raise Exception.Create('Incorrect JSON string!');
           method := Json.GetS('method');
           if method = '' then
           begin
-            result := False;
+            Result := False;
             Exit;
           end;
           if (method = 'GetClientID') then
@@ -398,20 +400,15 @@ begin
           begin
             case StrToInt(method) of
               Ord(TMethodRequest.mrGET):
-                FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
+                FResponse := TResponsePipes.Create(Json.GetS('message'));
               Ord(TMethodRequest.mrPOST):
-                FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
+                FResponse := TResponsePipes.Create(Json.GetS('message'));
               Ord(TMethodRequest.mrPUT):
-                FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
+                FResponse := TResponsePipes.Create(Json.GetS('message'));
               Ord(TMethodRequest.mrPATCH):
-                FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
+                FResponse := TResponsePipes.Create(Json.GetS('message'));
               Ord(TMethodRequest.mrDELETE):
-                FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
+                FResponse := TResponsePipes.Create(Json.GetS('message'));
             end;
             AfterExcecute;
           end;
@@ -421,7 +418,7 @@ begin
       MSG_GETPIPECLIENTS:
         m := 'MSG_GETPIPECLIENTS';
     else
-      result := False;
+      Result := False;
     end;
   except
     on E: Exception do
@@ -433,7 +430,7 @@ end;
 
 function TRequestPipes.Endpoint(const AEndPoint: string): IRequest;
 begin
-  result := Self;
+  Result := Self;
   FEndPoint := AEndPoint;
 end;
 
@@ -465,7 +462,7 @@ function TRequestPipes.MakeURL(const AIncludeParams: Boolean): string;
 var
   i: integer;
 begin
-  result := FEndPoint;
+  Result := FEndPoint;
   // if not FResource.Trim.IsEmpty then
   // begin
   // if not Result.EndsWith('/') then
@@ -502,61 +499,63 @@ end;
 
 function TRequestPipes.FullRequestURL(const AIncludeParams: Boolean): string;
 begin
-  result := Self.MakeURL(AIncludeParams);
+  Result := Self.MakeURL(AIncludeParams);
 end;
 
 function TRequestPipes.Get: IResponse;
 begin
   ExecuteRequest(mrGET);
-  result := FResponse;
+  Result := FResponse;
 end;
 
 class function TRequestPipes.New: IRequest;
 begin
   FClassInstance := TRequestPipes.Create;
-  result := FClassInstance;
+  Result := FClassInstance;
 end;
 
 function TRequestPipes.OnAfterExecute(const AOnAfterExecute
   : TRR4DCallbackOnAfterExecute): IRequest;
 begin
-  result := Self;
+  Result := Self;
   FOnAfterExecute := AOnAfterExecute;
 end;
 
 function TRequestPipes.OnBeforeExecute(const AOnBeforeExecute
   : TRR4DCallbackOnBeforeExecute): IRequest;
 begin
-  result := Self;
+  Result := Self;
   FOnBeforeExecute := AOnBeforeExecute;
 end;
 
 function TRequestPipes.Patch: IResponse;
 begin
   ExecuteRequest(mrPATCH);
-  result := FResponse;
+  Result := FResponse;
 end;
 
-function TRequestPipes.PipeServer(const AServerName, ANamedPipe: string)
-  : IRequest;
+function TRequestPipes.PipeServer(const ANamedPipe: string): IRequest;
 begin
-  result := Self;
-  FServerName := AServerName;
   FNamedPipe := ANamedPipe;
-  InitPipeClient(PAnsiChar(AnsiString(FNamedPipe)), @CallBack);
-  FConnected := ConnectPipeClient(20000);
+  if FServerName = '' then
+    FServerName := InitPipeClient(PAnsiChar(AnsiString(FNamedPipe)), @CallBack);
+  if not FConnected then
+    FConnected := ConnectPipeClient(20000);
+  Result := Self;
 end;
 
 function TRequestPipes.Post: IResponse;
 begin
   ExecuteRequest(mrPOST);
-  result := FResponse;
+  Result := FResponse;
 end;
 
 function TRequestPipes.Put: IResponse;
 begin
   ExecuteRequest(mrPUT);
-  result := FResponse;
+  Result := FResponse;
 end;
+
+initialization
 
 end.

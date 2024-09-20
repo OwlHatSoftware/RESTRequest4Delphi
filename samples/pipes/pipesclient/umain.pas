@@ -76,7 +76,7 @@ procedure TForm1.btnDELETEClick(Sender: TObject);
 var
   LResponse: IResponse;
 begin
-  LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
+  LResponse := TRequest.New.PipeServer(edtPipeName.Text)
     .Endpoint(edtEndpoint.Text).Delete;
   if LResponse = nil then
     Exit;
@@ -89,7 +89,7 @@ var
   LResponse: IResponse;
 begin
   mmBody.Lines.Clear;
-  LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
+  LResponse := TRequest.New.PipeServer(edtPipeName.Text)
     .Endpoint(edtEndpoint.Text).OnAfterExecute(
     procedure(const Req: IRequest; const Res: IResponse)
     begin
@@ -105,7 +105,7 @@ var
   LResponse: IResponse;
 begin
   mmBody.Lines.Clear;
-  LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
+  LResponse := TRequest.New.PipeServer(edtPipeName.Text)
     .AddBody(mmCustomBody.Text).Endpoint(edtEndpoint.Text).OnAfterExecute(
     procedure(const Req: IRequest; const Res: IResponse)
     begin
@@ -120,7 +120,7 @@ procedure TForm1.btnPUTClick(Sender: TObject);
 var
   LResponse: IResponse;
 begin
-  LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
+  LResponse := TRequest.New.PipeServer(edtPipeName.Text)
     .AddBody(mmCustomBody.Text).Endpoint(edtEndpoint.Text).Put;
   if LResponse = nil then
     Exit;

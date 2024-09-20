@@ -23,7 +23,6 @@ object frmPipeServer: TfrmPipeServer
     Caption = 'Panel1'
     ShowCaption = False
     TabOrder = 0
-    ExplicitWidth = 382
     object Label1: TLabel
       Left = 16
       Top = 11
@@ -89,8 +88,6 @@ object frmPipeServer: TfrmPipeServer
     Padding.Right = 5
     Padding.Bottom = 5
     TabOrder = 1
-    ExplicitWidth = 388
-    ExplicitHeight = 191
     object Memo1: TMemo
       Left = 7
       Top = 22
@@ -100,8 +97,6 @@ object frmPipeServer: TfrmPipeServer
       Lines.Strings = (
         'Memo1')
       TabOrder = 0
-      ExplicitWidth = 374
-      ExplicitHeight = 162
     end
   end
   object mtUsers: TFDMemTable
