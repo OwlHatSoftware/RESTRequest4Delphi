@@ -62,6 +62,7 @@ type
     function BaseURL: string; overload;
 {$ENDIF}
 {$IF DEFINED(RR4D_PIPES)}
+    function Endpoint(const AEndPoint: string): IRequest;
     function PipeServer(const AServerName, ANamedPipe: string): IRequest;
 {$ENDIF}
 {$IF not DEFINED(RR4D_PIPES)}

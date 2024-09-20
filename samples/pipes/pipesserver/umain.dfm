@@ -23,10 +23,7 @@ object frmPipeServer: TfrmPipeServer
     Caption = 'Panel1'
     ShowCaption = False
     TabOrder = 0
-    ExplicitLeft = -53
-    ExplicitTop = 0
-    ExplicitWidth = 677
-    ExplicitHeight = 73
+    ExplicitWidth = 382
     object Label1: TLabel
       Left = 16
       Top = 11
@@ -92,10 +89,8 @@ object frmPipeServer: TfrmPipeServer
     Padding.Right = 5
     Padding.Bottom = 5
     TabOrder = 1
-    ExplicitLeft = -283
-    ExplicitTop = 170
-    ExplicitWidth = 677
-    ExplicitHeight = 118
+    ExplicitWidth = 388
+    ExplicitHeight = 191
     object Memo1: TMemo
       Left = 7
       Top = 22
@@ -105,9 +100,40 @@ object frmPipeServer: TfrmPipeServer
       Lines.Strings = (
         'Memo1')
       TabOrder = 0
-      ExplicitTop = 20
-      ExplicitWidth = 657
-      ExplicitHeight = 91
+      ExplicitWidth = 374
+      ExplicitHeight = 162
+    end
+  end
+  object mtUsers: TFDMemTable
+    FieldDefs = <>
+    IndexDefs = <>
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    ResourceOptions.AssignedValues = [rvSilentMode]
+    ResourceOptions.SilentMode = True
+    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.AutoCommitUpdates = True
+    StoreDefs = True
+    Left = 216
+    Top = 144
+    object mtUsersID: TAggregateField
+      AutoGenerateValue = arAutoInc
+      FieldKind = fkData
+      FieldName = 'ID'
+      DisplayName = ''
+    end
+    object mtUsersNAME: TStringField
+      FieldName = 'NAME'
+      Size = 255
+    end
+    object mtUsersLASTNAME: TStringField
+      FieldName = 'LASTNAME'
+      Size = 255
+    end
+    object mtUsersEMAIL: TStringField
+      FieldName = 'EMAIL'
+      Size = 255
     end
   end
 end

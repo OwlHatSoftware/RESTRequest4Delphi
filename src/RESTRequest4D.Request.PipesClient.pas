@@ -9,10 +9,12 @@ uses
   RESTRequest4D.Utils,
   RESTRequest4D.Request.Adapter.Contract,
   RESTRequest4D.Response.PipesClient,
+  upipetypes,
 {$IFDEF FPC}
   fpjson, fpjsonrtti, base64;
 {$ELSE}
-System.Json,
+System.AnsiStrings,
+  System.Json,
   System.NetEncoding,
   REST.Json;
 {$ENDIF}
@@ -31,15 +33,29 @@ type
 
   TRequestPipes = class(TInterfacedObject, IRequest)
   private
+    // class var FCallBack: TCallBackFunction;
+    FResponse: IResponse;
+    FConnected: Boolean;
+    FID: integer;
+    FEndPoint: string;
     FServerName, FNamedPipe: string;
     FAdapters: TArray<IRequestAdapter>;
     FFiles: TDictionary<string, TFile>;
     FStreamSend: TStream;
+    FOnBeforeExecute: TRR4DCallbackOnBeforeExecute;
+    FOnAfterExecute: TRR4DCallbackOnAfterExecute;
+    function DoCallBack(msgType: integer; // this is the messagetype constant
+      var pipeID: Int32; // The clients pipeID
+      var answer: PAnsiChar; // an answer composed as a string
+      var param: DWORD
+      // some parameter as a DWORD in most cases the string length
+      ): Boolean;
     procedure ExecuteRequest(const AMethod: TMethodRequest);
     function Adapters(const AAdapter: IRequestAdapter): IRequest; overload;
     function Adapters(const AAdapters: TArray<IRequestAdapter>)
       : IRequest; overload;
     function Adapters: TArray<IRequestAdapter>; overload;
+    function Endpoint(const AEndPoint: string): IRequest;
     function PipeServer(const AServerName, ANamedPipe: string): IRequest;
     function OnBeforeExecute(const AOnBeforeExecute
       : TRR4DCallbackOnBeforeExecute): IRequest;
@@ -68,21 +84,26 @@ type
     function AddFile(const AFieldName: string; const AValue: TStream;
       const AFileName: string = ''; const AContentType: string = '')
       : IRequest; overload;
+    function MakeURL(const AIncludeParams: Boolean): string;
   protected
     procedure DoAfterExecute(const Sender: TObject;
       const AResponse: IResponse); virtual;
+    procedure DoBeforeExecute; virtual;
   public
-    class var FResponse: IResponse;
-    class var FConnected: Boolean;
-    class var FID: integer;
+
+    procedure AfterExcecute;
     constructor Create;
     class function New: IRequest;
     destructor Destroy; override;
+    // property OnCallBack: TCallBackFunction read FCallBack write FCallBack;
   end;
+
+  var
+    FClassInstance: TRequestPipes;
 
 implementation
 
-uses upipetypes, superobject, supertypes;
+uses superobject, supertypes;
 
 function InitPipeClient(PipeName: PAnsiChar; CallBack: TCallBackFunction)
   : PAnsiChar; register; stdcall; external('PipeClient.dll');
@@ -93,92 +114,12 @@ procedure PipeClientMessageToServer(Msg: PAnsiChar); register; stdcall;
 
 function CallBack(msgType: integer; var pipeID: integer; var answer: PAnsiChar;
   var param: DWORD): Boolean; stdcall;
-var
-  pid, i: integer;
-  s, m: AnsiString;
-  method: string;
-  p: DWORD;
-  Json: ISuperObject;
-  jsonarray: TSuperArray;
 begin
-  Result := True;
-  pid := pipeID;
-  s := StrPas(answer);
-  p := param;
-  try
-    case msgType of
-      MSG_PIPESENT:
-        m := 'MSG_PIPESENT';
-      MSG_PIPECONNECT:
-        m := 'MSG_PIPECONNECT';
-      MSG_PIPEDISCONNECT:
-        begin
-          m := 'MSG_PIPEDISCONNECT';
-          with TRequestPipes do
-          begin
-            FID := -1;
-            FConnected := False;
-          end;
-        end;
-      MSG_PIPEMESSAGE:
-        begin
-          m := 'MSG_PIPEMESSAGE';
-          Json := TSuperObject.ParseString(PSOChar(WideString(s)), True);
-          if not assigned(Json) then
-            raise Exception.Create('Incorrect JSON string!');
-          method := Json.GetS('method');
-          if method = '' then
-          begin
-            Result := False;
-            Exit;
-          end;
-          if method = 'GetClientID' then
-          begin
-            TRequestPipes.FID := Json.GetI('ClientID');
-          end
-          else if method = 'GetConnectedPipeClients' then
-          begin
-            jsonarray := Json.GetA('ClientIDs');
-            for i := 0 to jsonarray.Length - 1 do
-              if jsonarray[i].AsInteger <> 0 then
-                if jsonarray[i].AsInteger <> TRequestPipes.FID then
-          end
-          else
-          begin
-            TRequestPipes.FResponse := nil;
-            case StrToInt(method) of
-              Ord(TMethodRequest.mrGET):
-                TRequestPipes.FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrPOST):
-                TRequestPipes.FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrPUT):
-                TRequestPipes.FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrPATCH):
-                TRequestPipes.FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrDELETE):
-                TRequestPipes.FResponse :=
-                  TResponsePipes.Create(Json.GetS('message'));
-            end;
-          end;
-        end;
-      MSG_PIPEERROR:
-        m := 'MSG_PIPEERROR';
-      MSG_GETPIPECLIENTS:
-        m := 'MSG_GETPIPECLIENTS';
-    else
-      Result := False;
-    end;
-  except
-    on E: Exception do
-    begin
-      raise;
-      Result := False;
-    end;
-  end;
+  Result := False;
+  if not Assigned(FClassInstance)  then
+    Exit;
+  result := FClassInstance.DoCallBack(msgType, pipeID,
+    answer, param);
 end;
 
 { TFile }
@@ -201,19 +142,19 @@ end;
 
 function TRequestPipes.Adapters: TArray<IRequestAdapter>;
 begin
-
+  result := FAdapters;
 end;
 
 function TRequestPipes.Adapters(const AAdapters: TArray<IRequestAdapter>)
   : IRequest;
 begin
   FAdapters := AAdapters;
-  Result := Self;
+  result := Self;
 end;
 
 function TRequestPipes.Adapters(const AAdapter: IRequestAdapter): IRequest;
 begin
-  Result := Adapters([AAdapter]);
+  result := Adapters([AAdapter]);
 end;
 
 function TRequestPipes.AddBody(const AContent: TObject; const AOwns: Boolean)
@@ -231,7 +172,7 @@ begin
   LJSONObject := TJson.ObjectToJsonObject(AContent);
 {$ENDIF}
   try
-    Result := Self.AddBody(LJSONObject, False);
+    result := Self.AddBody(LJSONObject, False);
   finally
 {$IFDEF FPC}
     LJSONStreamer.Free;
@@ -251,7 +192,7 @@ end;
 function TRequestPipes.AddBody(const AContent: TStream; const AOwns: Boolean)
   : IRequest;
 begin
-  Result := Self;
+  result := Self;
   try
     TstringStream(FStreamSend).CopyFrom(AContent, AContent.Size);
     FStreamSend.Position := 0;
@@ -266,7 +207,7 @@ function TRequestPipes.AddFile(const AFieldName: string; const AValue: TStream;
 var
   LFile: TFile;
 begin
-  Result := Self;
+  result := Self;
   if not assigned(AValue) then
     Exit;
   if (AValue <> Nil) and (AValue.Size > 0) then
@@ -278,17 +219,23 @@ end;
 
 function TRequestPipes.AddHeader(const AName, AValue: string): IRequest;
 begin
-
+  result := Self;
 end;
 
 function TRequestPipes.AddParam(const AName, AValue: string): IRequest;
 begin
+  result := Self;
+end;
 
+procedure TRequestPipes.AfterExcecute;
+begin
+  if assigned(FClassInstance) then
+    FClassInstance.DoAfterExecute(FClassInstance, FResponse);
 end;
 
 function TRequestPipes.AddBody(const AContent: string): IRequest;
 begin
-  Result := Self;
+  result := Self;
   TstringStream(FStreamSend).Writestring(AContent);
   FStreamSend.Position := 0;
 end;
@@ -297,9 +244,9 @@ function TRequestPipes.AddBody(const AContent: TJSONArray; const AOwns: Boolean)
   : IRequest;
 begin
 {$IFDEF FPC}
-  Result := Self.AddBody(AContent.AsJSON);
+  result := Self.AddBody(AContent.AsJSON);
 {$ELSE}
-  Result := Self.AddBody(AContent.ToJSON);
+  result := Self.AddBody(AContent.ToJSON);
 {$ENDIF}
   if AOwns then
   begin
@@ -315,9 +262,9 @@ function TRequestPipes.AddBody(const AContent: TJSONObject;
   const AOwns: Boolean): IRequest;
 begin
 {$IFDEF FPC}
-  Result := Self.AddBody(AContent.AsJSON);
+  result := Self.AddBody(AContent.AsJSON);
 {$ELSE}
-  Result := Self.AddBody(AContent.ToJSON);
+  result := Self.AddBody(AContent.ToJSON);
 {$ENDIF}
   if AOwns then
   begin
@@ -334,7 +281,7 @@ function TRequestPipes.AddFile(const AFieldName, AFileName,
 var
   LStream: TMemoryStream;
 begin
-  Result := Self;
+  result := Self;
   if not FileExists(AFileName) then
     Exit;
   LStream := TMemoryStream.Create;
@@ -349,7 +296,7 @@ end;
 
 function TRequestPipes.ClearBody: IRequest;
 begin
-  Result := Self;
+  result := Self;
   FStreamSend.Position := 0;
   FStreamSend.Size := 0;
 end;
@@ -360,12 +307,13 @@ begin
   FConnected := False;
   FStreamSend := TstringStream.Create('', TEncoding.UTF8);
   FFiles := TDictionary<string, TFile>.Create;
+  // FCallBack := DoCallBack;
 end;
 
 function TRequestPipes.Delete: IResponse;
 begin
   ExecuteRequest(mrDELETE);
-  Result := FResponse;
+  result := FResponse;
 end;
 
 destructor TRequestPipes.Destroy;
@@ -377,8 +325,116 @@ end;
 
 procedure TRequestPipes.DoAfterExecute(const Sender: TObject;
   const AResponse: IResponse);
+var
+  LAdapter: IRequestAdapter;
 begin
+  if assigned(FOnAfterExecute) then
+    FOnAfterExecute(Self, FResponse);
+  for LAdapter in FAdapters do
+    LAdapter.Execute(FResponse.Content);
+end;
 
+procedure TRequestPipes.DoBeforeExecute;
+begin
+  if assigned(FOnBeforeExecute) then
+    FOnBeforeExecute(Self);
+end;
+
+function TRequestPipes.DoCallBack(msgType: integer; var pipeID: Int32;
+  var answer: PAnsiChar; var param: DWORD): Boolean;
+var
+  pid, i: integer;
+  s, m: AnsiString;
+  method: string;
+  p: DWORD;
+  Json: ISuperObject;
+  jsonarray: TSuperArray;
+begin
+  result := True;
+  pid := pipeID;
+  s := System.AnsiStrings.StrPas(answer);
+  p := param;
+  try
+    case msgType of
+      MSG_PIPESENT:
+        begin
+          m := 'MSG_PIPESENT';
+        end;
+      MSG_PIPECONNECT:
+        begin
+          m := 'MSG_PIPECONNECT';
+        end;
+      MSG_PIPEDISCONNECT:
+        begin
+          m := 'MSG_PIPEDISCONNECT';
+          FID := -1;
+          FConnected := False;
+        end;
+      MSG_PIPEMESSAGE:
+        begin
+          m := 'MSG_PIPEMESSAGE';
+          Json := TSuperObject.ParseString(PSOChar(WideString(s)), True);
+          if not assigned(Json) then
+            raise Exception.Create('Incorrect JSON string!');
+          method := Json.GetS('method');
+          if method = '' then
+          begin
+            result := False;
+            Exit;
+          end;
+          if (method = 'GetClientID') then
+          begin
+            FID := Json.GetI('ClientID');
+            FConnected := True;
+          end
+          else if (method = 'GetConnectedPipeClients') and FConnected then
+          begin
+            jsonarray := Json.GetA('ClientIDs');
+            for i := 0 to jsonarray.Length - 1 do
+              if jsonarray[i].AsInteger <> 0 then
+                if jsonarray[i].AsInteger <> FID then
+          end
+          else if FConnected then
+          begin
+            case StrToInt(method) of
+              Ord(TMethodRequest.mrGET):
+                FResponse :=
+                  TResponsePipes.Create(Json.GetS('message'));
+              Ord(TMethodRequest.mrPOST):
+                FResponse :=
+                  TResponsePipes.Create(Json.GetS('message'));
+              Ord(TMethodRequest.mrPUT):
+                FResponse :=
+                  TResponsePipes.Create(Json.GetS('message'));
+              Ord(TMethodRequest.mrPATCH):
+                FResponse :=
+                  TResponsePipes.Create(Json.GetS('message'));
+              Ord(TMethodRequest.mrDELETE):
+                FResponse :=
+                  TResponsePipes.Create(Json.GetS('message'));
+            end;
+            AfterExcecute;
+          end;
+        end;
+      MSG_PIPEERROR:
+        m := 'MSG_PIPEERROR';
+      MSG_GETPIPECLIENTS:
+        m := 'MSG_GETPIPECLIENTS';
+    else
+      result := False;
+    end;
+  except
+    on E: Exception do
+    begin
+      raise;
+    end;
+  end;
+end;
+
+function TRequestPipes.Endpoint(const AEndPoint: string): IRequest;
+begin
+  result := Self;
+  FEndPoint := AEndPoint;
 end;
 
 procedure TRequestPipes.ExecuteRequest(const AMethod: TMethodRequest);
@@ -386,70 +442,121 @@ var
   Json, jsonarray: ISuperObject;
   i, v: integer;
 begin
-  FConnected := ConnectPipeClient(20000);
+  FResponse := nil;
   if FConnected then
   begin
+    DoBeforeExecute;
     FStreamSend.Position := 0;
+
     Json := SO();
     Json.s['method'] := Ord(AMethod).ToString;
-    Json.s['message'] := FStreamSend.ToJSON().AsString;
+    Json.s['endpoint'] := FEndPoint;
+    case AMethod of
+      mrGET, mrPOST, mrPUT, mrPATCH, mrDELETE:
+        Json.s['message'] := TstringStream(FStreamSend).DataString;
+    else
+      Json.s['message'] := FStreamSend.ToJSON().AsString;
+    end;
+    PipeClientMessageToServer(PAnsiChar(AnsiString(Json.AsJSON())));
   end;
-  PipeClientMessageToServer(PAnsiChar(AnsiString(Json.AsJSON())))
+end;
+
+function TRequestPipes.MakeURL(const AIncludeParams: Boolean): string;
+var
+  i: integer;
+begin
+  result := FEndPoint;
+  // if not FResource.Trim.IsEmpty then
+  // begin
+  // if not Result.EndsWith('/') then
+  // Result := Result + '/';
+  // Result := Result + FResource;
+  // end;
+  // if not FResourceSuffix.Trim.IsEmpty then
+  // begin
+  // if not Result.EndsWith('/') then
+  // Result := Result + '/';
+  // Result := Result + FResourceSuffix;
+  // end;
+  // if FUrlSegments.Count > 0 then
+  // begin
+  // for I := 0 to Pred(FUrlSegments.Count) do
+  // begin
+  // Result := stringReplace(Result, Format('{%s}', [FUrlSegments.Names[I]]), FUrlSegments.ValueFromIndex[I], [rfReplaceAll, rfIgnoreCase]);
+  // Result := stringReplace(Result, Format(':%s', [FUrlSegments.Names[I]]), FUrlSegments.ValueFromIndex[I], [rfReplaceAll, rfIgnoreCase]);
+  // end;
+  // end;
+  // if not AIncludeParams then
+  // Exit;
+  // if FParams.Count > 0 then
+  // begin
+  // Result := Result + '?';
+  // for I := 0 to Pred(FParams.Count) do
+  // begin
+  // if I > 0 then
+  // Result := Result + '&';
+  // Result := Result + FParams.strings[I];
+  // end;
+  // end;
 end;
 
 function TRequestPipes.FullRequestURL(const AIncludeParams: Boolean): string;
 begin
-
+  result := Self.MakeURL(AIncludeParams);
 end;
 
 function TRequestPipes.Get: IResponse;
 begin
   ExecuteRequest(mrGET);
-  Result := FResponse;
+  result := FResponse;
 end;
 
 class function TRequestPipes.New: IRequest;
 begin
-  Result := TRequestPipes.Create;
+  FClassInstance := TRequestPipes.Create;
+  result := FClassInstance;
 end;
 
 function TRequestPipes.OnAfterExecute(const AOnAfterExecute
   : TRR4DCallbackOnAfterExecute): IRequest;
 begin
-
+  result := Self;
+  FOnAfterExecute := AOnAfterExecute;
 end;
 
 function TRequestPipes.OnBeforeExecute(const AOnBeforeExecute
   : TRR4DCallbackOnBeforeExecute): IRequest;
 begin
-
+  result := Self;
+  FOnBeforeExecute := AOnBeforeExecute;
 end;
 
 function TRequestPipes.Patch: IResponse;
 begin
   ExecuteRequest(mrPATCH);
-  Result := FResponse;
+  result := FResponse;
 end;
 
 function TRequestPipes.PipeServer(const AServerName, ANamedPipe: string)
   : IRequest;
 begin
-  Result := Self;
+  result := Self;
   FServerName := AServerName;
   FNamedPipe := ANamedPipe;
   InitPipeClient(PAnsiChar(AnsiString(FNamedPipe)), @CallBack);
+  FConnected := ConnectPipeClient(20000);
 end;
 
 function TRequestPipes.Post: IResponse;
 begin
   ExecuteRequest(mrPOST);
-  Result := FResponse;
+  result := FResponse;
 end;
 
 function TRequestPipes.Put: IResponse;
 begin
   ExecuteRequest(mrPUT);
-  Result := FResponse;
+  result := FResponse;
 end;
 
 end.

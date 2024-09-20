@@ -51,6 +51,7 @@ type
     lblMultipartFormDataFile: TLabel;
     edtMultipartFormDataText: TEdit;
     FDMemTable1: TFDMemTable;
+    edtEndpoint: TLabeledEdit;
     procedure FormCreate(Sender: TObject);
     procedure btnGETClick(Sender: TObject);
     procedure btnPOSTClick(Sender: TObject);
@@ -75,8 +76,8 @@ procedure TForm1.btnDELETEClick(Sender: TObject);
 var
   LResponse: IResponse;
 begin
-  LResponse := TRequest.New.PipeServer(edtPipeServer.Text,
-    edtPipeName.Text).Delete;
+  LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
+    .Endpoint(edtEndpoint.Text).Delete;
   if LResponse = nil then
     Exit;
   mmBody.Lines.Add(LResponse.Content);
@@ -87,24 +88,32 @@ procedure TForm1.btnGETClick(Sender: TObject);
 var
   LResponse: IResponse;
 begin
-  LResponse := TRequest.New.PipeServer(edtPipeServer.Text,
-    edtPipeName.Text).Get;
-  if LResponse = nil then
-    Exit;
-  mmBody.Lines.Add(LResponse.Content);
-  lblStatusCode.Caption := LResponse.StatusCode.ToString;
+  mmBody.Lines.Clear;
+  LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
+    .Endpoint(edtEndpoint.Text).OnAfterExecute(
+    procedure(const Req: IRequest; const Res: IResponse)
+    begin
+      if Res = nil then
+        Exit;
+      mmBody.Lines.Add(Res.Content);
+      lblStatusCode.Caption := Res.StatusCode.ToString;
+    end).Get;
 end;
 
 procedure TForm1.btnPOSTClick(Sender: TObject);
 var
   LResponse: IResponse;
 begin
+  mmBody.Lines.Clear;
   LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
-    .AddBody(mmCustomBody.Text).Post;
-  if LResponse = nil then
-    Exit;
-  mmBody.Lines.Add(LResponse.Content);
-  lblStatusCode.Caption := LResponse.StatusCode.ToString;
+    .AddBody(mmCustomBody.Text).Endpoint(edtEndpoint.Text).OnAfterExecute(
+    procedure(const Req: IRequest; const Res: IResponse)
+    begin
+      if Res = nil then
+        Exit;
+      mmBody.Lines.Add(Res.Content);
+      lblStatusCode.Caption := Res.StatusCode.ToString;
+    end).Post;
 end;
 
 procedure TForm1.btnPUTClick(Sender: TObject);
@@ -112,7 +121,7 @@ var
   LResponse: IResponse;
 begin
   LResponse := TRequest.New.PipeServer(edtPipeServer.Text, edtPipeName.Text)
-    .AddBody(mmCustomBody.Text).Put;
+    .AddBody(mmCustomBody.Text).Endpoint(edtEndpoint.Text).Put;
   if LResponse = nil then
     Exit;
   mmBody.Lines.Add(LResponse.Content);

@@ -4,8 +4,11 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, System.AnsiStrings, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
+  System.Classes, System.AnsiStrings, System.JSON, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client, DataSet.Serialize;
 
 type
   TfrmPipeServer = class(TForm)
@@ -18,6 +21,11 @@ type
     btnStopServer: TButton;
     GroupBox1: TGroupBox;
     Memo1: TMemo;
+    mtUsers: TFDMemTable;
+    mtUsersID: TAggregateField;
+    mtUsersLASTNAME: TStringField;
+    mtUsersNAME: TStringField;
+    mtUsersEMAIL: TStringField;
     procedure btnStartServerClick(Sender: TObject);
     procedure btnStopServerClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -26,6 +34,8 @@ type
     { Private declarations }
   public
     { Public declarations }
+    class function GetJSON: string;
+    class function PostJSON(const AString: string): string;
   end;
 
 var
@@ -77,31 +87,32 @@ begin
 end;
 
 function CallBack(msgType: integer; var pipeID: integer; var answer: PAnsiChar;
-  var param: DWORD): boolean; stdcall;
+  var Param: DWORD): boolean; stdcall;
 var
   pid, i, v: integer;
   s, m: AnsiString;
-  json, arrobj: ISuperObject;
+  JSON, arrobj: ISuperObject;
   jsonarray: TSuperArray;
   p: DWORD;
   sl: TStringList;
   method: string;
+  endpoint: string;
 begin
   Result := True;
   m := '';
   pid := pipeID;
   s := System.AnsiStrings.StrPas(answer);
-  p := param;
+  p := Param;
   case msgType of
     MSG_PIPESENT:
       m := 'MSG_PIPESENT';
     MSG_PIPECONNECT:
       begin
         m := 'MSG_PIPECONNECT';
-        json := TSuperObject.Create();
-        json.s['method'] := 'GetClientID';
-        json.i['ClientID'] := pid;
-        PipeServerMessageToClient(pid, PAnsiChar(AnsiString(json.AsJSon())));
+        JSON := TSuperObject.Create();
+        JSON.s['method'] := 'GetClientID';
+        JSON.i['ClientID'] := pid;
+        PipeServerMessageToClient(pid, PAnsiChar(AnsiString(JSON.AsJSon())));
       end;
     MSG_PIPEDISCONNECT:
       begin
@@ -111,23 +122,36 @@ begin
       begin
         m := 'MSG_PIPEMESSAGE';
         try
-          json := TSuperObject.ParseString(PSOChar(WideString(s)), True);
-          if not assigned(json) then
+          JSON := TSuperObject.ParseString(PSOChar(WideString(s)), True);
+          if not assigned(JSON) then
             raise Exception.Create('Incorrect JSON string!');
-          method := json.GetS('method');
-          s := json.GetS('message'); // store the received message
-          if (method = Ord(TMethodRequest.mrGET).ToString) or
-            (method = Ord(TMethodRequest.mrPOST).ToString) or
-            (method = Ord(TMethodRequest.mrPUT).ToString) or
-            (method = Ord(TMethodRequest.mrPATCH).ToString) or
-            (method = Ord(TMethodRequest.mrDELETE).ToString) then
+          method := JSON.GetS('method');
+          endpoint := JSON.GetS('endpoint');
+          s := JSON.GetS('message'); // store the received message
+          JSON := TSuperObject.Create();
+          JSON.s['method'] := method;
+          JSON.s['endpoint'] := endpoint;
+          if (method = Ord(TMethodRequest.mrGET).ToString) then
           begin
-            json := TSuperObject.Create();
-            json.s['method'] := method;
-            json.s['message'] := s; // echo back the received message
-            PipeServerMessageToClient(pid,
-              PAnsiChar(AnsiString(json.AsJSon())));
+            JSON.s['message'] := TfrmPipeServer.GetJSON;
           end;
+          if (method = Ord(TMethodRequest.mrPOST).ToString) then
+          begin
+            JSON.s['message'] := TfrmPipeServer.PostJSON(s);
+          end;
+          if (method = Ord(TMethodRequest.mrPUT).ToString) then
+          begin
+
+          end;
+          if (method = Ord(TMethodRequest.mrPATCH).ToString) then
+          begin
+
+          end;
+          if (method = Ord(TMethodRequest.mrDELETE).ToString) then
+          begin
+
+          end;
+          PipeServerMessageToClient(pid, PAnsiChar(AnsiString(JSON.AsJSon())));
         except
           on E: Exception do
             ShowMessage(E.Message);
@@ -141,15 +165,15 @@ begin
         sl := TStringList.Create;
         try
           ParseDelimited(sl, s, ';');
-          json := SO();
-          json.s['method'] := 'GetConnectedPipeClients';
+          JSON := SO();
+          JSON.s['method'] := 'GetConnectedPipeClients';
           arrobj := SA([]);
           for i := 0 to sl.Count - 1 do
             if TryStrToInt(sl[i], v) then
               arrobj.i['ID'] := v;
-          json.O['ClientIDs'] := arrobj;
-          BroadcastPipeServerMessage(PAnsiChar(AnsiString(json.AsString)),
-            Length(json.AsString));
+          JSON.O['ClientIDs'] := arrobj;
+          BroadcastPipeServerMessage(PAnsiChar(AnsiString(JSON.AsString)),
+            Length(JSON.AsString));
         finally
           FreeAndNil(sl);
         end;
@@ -196,6 +220,35 @@ end;
 procedure TfrmPipeServer.FormDestroy(Sender: TObject);
 begin
   DonePipeServer();
+end;
+
+class function TfrmPipeServer.GetJSON: string;
+var
+  LJSONArray: TJSONArray;
+begin
+  Result := '';
+  if not assigned(frmPipeServer) then
+    Exit;
+  LJSONArray := frmPipeServer.mtUsers.ToJSONArray();
+  try
+    Result := LJSONArray.Format;
+  finally
+    LJSONArray.Free;
+  end;
+end;
+
+class function TfrmPipeServer.PostJSON(const AString: string): string;
+begin
+  Result := '';
+  if not assigned(frmPipeServer) then
+    Exit;
+  try
+    frmPipeServer.mtUsers.LoadFromJSON(AString);
+    Result := 'OK';
+  except
+    on E: Exception do
+      Result := E.Message;
+  end;
 end;
 
 end.

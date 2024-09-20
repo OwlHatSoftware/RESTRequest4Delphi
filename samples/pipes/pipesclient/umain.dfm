@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 535
+  ClientHeight = 581
   ClientWidth = 830
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -5246,15 +5246,15 @@ object Form1: TForm1
     Left = 0
     Top = 78
     Width = 830
-    Height = 457
+    Height = 503
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
     ExplicitWidth = 824
-    ExplicitHeight = 440
+    ExplicitHeight = 486
     object Splitter1: TSplitter
       Left = 0
-      Top = 209
+      Top = 259
       Width = 830
       Height = 8
       Cursor = crVSplit
@@ -5265,14 +5265,14 @@ object Form1: TForm1
     end
     object Panel3: TPanel
       Left = 0
-      Top = 217
+      Top = 267
       Width = 830
-      Height = 240
+      Height = 236
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
       ExplicitWidth = 824
-      ExplicitHeight = 223
+      ExplicitHeight = 219
       object Panel6: TPanel
         Left = 0
         Top = 0
@@ -5326,7 +5326,7 @@ object Form1: TForm1
         Left = 0
         Top = 22
         Width = 830
-        Height = 218
+        Height = 214
         ActivePage = TabSheet6
         Align = alClient
         Font.Charset = ANSI_CHARSET
@@ -5337,7 +5337,7 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 1
         ExplicitWidth = 824
-        ExplicitHeight = 201
+        ExplicitHeight = 197
         object TabSheet6: TTabSheet
           Caption = 'Body'
           ImageIndex = 1
@@ -5345,11 +5345,10 @@ object Form1: TForm1
             Left = 0
             Top = 0
             Width = 822
-            Height = 188
+            Height = 184
             Align = alClient
+            ScrollBars = ssVertical
             TabOrder = 0
-            ExplicitWidth = 816
-            ExplicitHeight = 171
           end
         end
       end
@@ -5358,7 +5357,7 @@ object Form1: TForm1
       Left = 0
       Top = 0
       Width = 830
-      Height = 209
+      Height = 259
       Align = alTop
       BevelOuter = bvNone
       TabOrder = 1
@@ -5387,7 +5386,7 @@ object Form1: TForm1
         Left = 0
         Top = 22
         Width = 830
-        Height = 187
+        Height = 237
         ActivePage = TabSheet1
         Align = alClient
         Font.Charset = ANSI_CHARSET
@@ -5402,16 +5401,16 @@ object Form1: TForm1
           Caption = 'Request'
           DesignSize = (
             822
-            157)
+            207)
           object Label1: TLabel
-            Left = 10
-            Top = 53
+            Left = 6
+            Top = 99
             Width = 75
             Height = 15
             Caption = 'Custom body:'
           end
           object edtPipeServer: TLabeledEdit
-            Left = 10
+            Left = 6
             Top = 24
             Width = 343
             Height = 23
@@ -5437,17 +5436,17 @@ object Form1: TForm1
             ExplicitLeft = 378
           end
           object mmCustomBody: TMemo
-            Left = 10
-            Top = 74
-            Width = 719
-            Height = 71
+            Left = 6
+            Top = 120
+            Width = 723
+            Height = 84
             Anchors = [akLeft, akTop, akRight]
             Lines.Strings = (
               
-                '{"name":"Vinicius","lastName":"Sanchez","email":"vinicius@fioril' +
+                '{"name":"Vinicius","lastname":"Sanchez","email":"vinicius@fioril' +
                 'li.com.br"}')
             TabOrder = 2
-            ExplicitWidth = 713
+            ExplicitWidth = 717
           end
           object btnDELETE: TButton
             Left = 741
@@ -5492,6 +5491,19 @@ object Form1: TForm1
             TabOrder = 6
             OnClick = btnGETClick
             ExplicitLeft = 735
+          end
+          object edtEndpoint: TLabeledEdit
+            Left = 6
+            Top = 70
+            Width = 723
+            Height = 23
+            Anchors = [akLeft, akTop, akRight]
+            EditLabel.Width = 51
+            EditLabel.Height = 15
+            EditLabel.Caption = 'Endpoint:'
+            TabOrder = 7
+            Text = ''
+            ExplicitWidth = 717
           end
         end
         object TabSheet2: TTabSheet
@@ -5599,7 +5611,7 @@ object Form1: TForm1
             Left = 0
             Top = 79
             Width = 822
-            Height = 78
+            Height = 128
             Align = alClient
             BevelOuter = bvNone
             Caption = 'Panel10'
@@ -5610,7 +5622,7 @@ object Form1: TForm1
               Left = 10
               Top = 0
               Width = 129
-              Height = 78
+              Height = 128
               Margins.Left = 10
               Margins.Top = 0
               Margins.Right = 0
