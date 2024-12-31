@@ -356,76 +356,81 @@ begin
   pid := pipeID;
   s := System.AnsiStrings.StrPas(answer);
   p := param;
-  try
-    case msgType of
-      MSG_PIPESENT:
+  // try
+  case msgType of
+    MSG_PIPESENT:
+      begin
+        m := 'MSG_PIPESENT';
+      end;
+    MSG_PIPECONNECT:
+      begin
+        m := 'MSG_PIPECONNECT';
+      end;
+    MSG_PIPEDISCONNECT:
+      begin
+        m := 'MSG_PIPEDISCONNECT';
+        FID := -1;
+        FConnected := False;
+      end;
+    MSG_PIPEMESSAGE:
+      begin
+        m := 'MSG_PIPEMESSAGE';
+        Json := TSuperObject.ParseString(PSOChar(WideString(s)), True);
+        if not Assigned(Json) then
         begin
-          m := 'MSG_PIPESENT';
+          Result := False;
+          Exit;
         end;
-      MSG_PIPECONNECT:
+        method := Json.GetS('method');
+        if method = '' then
         begin
-          m := 'MSG_PIPECONNECT';
+          Result := False;
+          Exit;
         end;
-      MSG_PIPEDISCONNECT:
+        if (method = 'GetClientID') then
         begin
-          m := 'MSG_PIPEDISCONNECT';
-          FID := -1;
-          FConnected := False;
-        end;
-      MSG_PIPEMESSAGE:
+          FID := Json.GetI('ClientID');
+          FConnected := True;
+        end
+        else if (method = 'GetConnectedPipeClients') and FConnected then
         begin
-          m := 'MSG_PIPEMESSAGE';
-          Json := TSuperObject.ParseString(PSOChar(WideString(s)), True);
-          if not Assigned(Json) then
-            raise Exception.Create('Incorrect JSON string!');
-          method := Json.GetS('method');
-          if method = '' then
-          begin
-            Result := False;
-            Exit;
+          jsonarray := Json.GetA('ClientIDs');
+          for i := 0 to jsonarray.Length - 1 do
+            if jsonarray[i].AsInteger <> 0 then
+              if jsonarray[i].AsInteger <> FID then
+        end
+        else if FConnected then
+        begin
+          case StrToInt(method) of
+            Ord(TMethodRequest.mrGET):
+              FResponse := TResponsePipes.Create(Json.GetS('message'));
+            Ord(TMethodRequest.mrPOST):
+              FResponse := TResponsePipes.Create(Json.GetS('message'));
+            Ord(TMethodRequest.mrPUT):
+              FResponse := TResponsePipes.Create(Json.GetS('message'));
+            Ord(TMethodRequest.mrPATCH):
+              FResponse := TResponsePipes.Create(Json.GetS('message'));
+            Ord(TMethodRequest.mrDELETE):
+              FResponse := TResponsePipes.Create(Json.GetS('message'));
+            Ord(TMethodRequest.mrBROADCAST):
+              FResponse := TResponsePipes.Create(Json.GetS('message'));
           end;
-          if (method = 'GetClientID') then
-          begin
-            FID := Json.GetI('ClientID');
-            FConnected := True;
-          end
-          else if (method = 'GetConnectedPipeClients') and FConnected then
-          begin
-            jsonarray := Json.GetA('ClientIDs');
-            for i := 0 to jsonarray.Length - 1 do
-              if jsonarray[i].AsInteger <> 0 then
-                if jsonarray[i].AsInteger <> FID then
-          end
-          else if FConnected then
-          begin
-            case StrToInt(method) of
-              Ord(TMethodRequest.mrGET):
-                FResponse := TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrPOST):
-                FResponse := TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrPUT):
-                FResponse := TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrPATCH):
-                FResponse := TResponsePipes.Create(Json.GetS('message'));
-              Ord(TMethodRequest.mrDELETE):
-                FResponse := TResponsePipes.Create(Json.GetS('message'));
-            end;
-            AfterExcecute;
-          end;
+          AfterExcecute;
         end;
-      MSG_PIPEERROR:
-        m := 'MSG_PIPEERROR';
-      MSG_GETPIPECLIENTS:
-        m := 'MSG_GETPIPECLIENTS';
-    else
-      Result := False;
-    end;
-  except
-    on E: Exception do
-    begin
-      raise;
-    end;
+      end;
+    MSG_PIPEERROR:
+      m := 'MSG_PIPEERROR';
+    MSG_GETPIPECLIENTS:
+      m := 'MSG_GETPIPECLIENTS';
+  else
+    Result := False;
   end;
+  // except
+  // on E: Exception do
+  // begin
+  // raise;
+  // end;
+  // end;
 end;
 
 function TRequestPipes.Endpoint(const AEndPoint: string): IRequest;

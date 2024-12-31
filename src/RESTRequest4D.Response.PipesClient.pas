@@ -1,22 +1,22 @@
 unit RESTRequest4D.Response.PipesClient;
 
 {$IFDEF FPC}
-  {$mode delphi}
+{$mode delphi}
 {$ENDIF}
 
 interface
 
 uses Classes, SysUtils, RESTRequest4D.Response.Contract,
-  {$IFDEF FPC}
-    fpjson, jsonparser;
-  {$ELSE}
-    System.Json;
-  {$ENDIF}
+{$IFDEF FPC}
+  fpjson, jsonparser;
+{$ELSE}
+System.Json;
+{$ENDIF}
 
 type
   TResponsePipes = class(TInterfacedObject, IResponse)
   private
-    FJSONValue: {$IFDEF FPC}TJSONData;{$ELSE}TJSONValue;{$ENDIF}
+    FJSONValue: {$IFDEF FPC}TJSONData; {$ELSE}TJSONValue; {$ENDIF}
     FStreamResult: TStringStream;
     function Content: string;
     function ContentLength: Cardinal;
@@ -27,12 +27,13 @@ type
     function StatusText: string;
     function RawBytes: TBytes;
     function Headers: TStrings;
-    {$IFDEF FPC}
-      function JSONValue: TJSONData;
-    {$ELSE}
-      function JSONValue: TJSONValue; overload;
-      function JSONValue(const AEncoding: TEncoding): TJSONValue; overload;
-    {$ENDIF}
+{$IFDEF FPC}
+    function JSONValue: TJSONData;
+{$ELSE}
+    function TryJSONValue(var AJSONValue: TJSONValue): boolean;
+    function JSONValue: TJSONValue; overload;
+    function JSONValue(const AEncoding: TEncoding): TJSONValue; overload;
+{$ENDIF}
     function GetCookie(const ACookieName: string): string;
   public
     constructor Create(AData: string);
@@ -68,13 +69,35 @@ begin
 end;
 
 function TResponsePipes.StatusCode: Integer;
+var
+  Val: TJSONValue;
+  LMessage: string;
 begin
-  Result := 0;
+  if TryJSONValue(Val) and Val.TryGetValue<string>('message', LMessage) then
+    Result := LMessage.Substring(0, 3).ToInteger
+  else
+    Result := 0;
 end;
 
 function TResponsePipes.StatusText: string;
+var
+  Val: TJSONValue;
+  LMessage: string;
 begin
-  Result := '';
+  if TryJSONValue(Val) and Val.TryGetValue<string>('message', LMessage) then
+    Result := LMessage.Substring(4)
+  else
+    Result := '';
+end;
+
+function TResponsePipes.TryJSONValue(var AJSONValue: TJSONValue): boolean;
+begin
+  result := True;
+  try
+    AJSONValue := JSONValue;
+  except
+    result := False;
+  end;
 end;
 
 function TResponsePipes.RawBytes: TBytes;
@@ -83,6 +106,7 @@ begin
 end;
 
 {$IFDEF FPC}
+
 function TResponsePipes.JSONValue: TJSONData;
 var
   LContent: string;
@@ -106,6 +130,7 @@ begin
   Result := FJSONValue;
 end;
 {$ELSE}
+
 function TResponsePipes.JSONValue: TJSONValue;
 begin
   Result := Self.JSONValue(TEncoding.UTF8);
@@ -119,9 +144,11 @@ begin
   begin
     LContent := Content.Trim;
     if LContent.StartsWith('{') then
-      FJSONValue := (TJSONObject.ParseJSONValue(AEncoding.GetBytes(LContent), 0) as TJSONObject)
+      FJSONValue := (TJSONObject.ParseJSONValue(AEncoding.GetBytes(LContent), 0)
+        as TJSONObject)
     else if LContent.StartsWith('[') then
-      FJSONValue := (TJSONObject.ParseJSONValue(AEncoding.GetBytes(LContent), 0) as TJSONArray)
+      FJSONValue := (TJSONObject.ParseJSONValue(AEncoding.GetBytes(LContent), 0)
+        as TJSONArray)
     else
       raise Exception.Create('The return content is not a valid JSON value.');
   end;

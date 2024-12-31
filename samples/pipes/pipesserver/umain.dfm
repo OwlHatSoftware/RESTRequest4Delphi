@@ -2,8 +2,8 @@ object frmPipeServer: TfrmPipeServer
   Left = 0
   Top = 0
   Caption = 'frmPipeServer'
-  ClientHeight = 288
-  ClientWidth = 394
+  ClientHeight = 498
+  ClientWidth = 749
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,13 +11,15 @@ object frmPipeServer: TfrmPipeServer
   Font.Name = 'Segoe UI'
   Font.Style = []
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
+  DesignSize = (
+    749
+    498)
   TextHeight = 15
   object Panel1: TPanel
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 388
+    Width = 743
     Height = 74
     Align = alTop
     Caption = 'Panel1'
@@ -75,14 +77,14 @@ object frmPipeServer: TfrmPipeServer
   object GroupBox1: TGroupBox
     Left = 0
     Top = 80
-    Width = 394
-    Height = 208
+    Width = 746
+    Height = 234
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
-    Align = alClient
-    Caption = 'Messages'
+    Anchors = [akLeft, akTop, akRight]
+    Caption = 'Server Messages'
     Padding.Left = 5
     Padding.Top = 5
     Padding.Right = 5
@@ -91,12 +93,56 @@ object frmPipeServer: TfrmPipeServer
     object Memo1: TMemo
       Left = 7
       Top = 22
-      Width = 380
-      Height = 179
+      Width = 732
+      Height = 205
       Align = alClient
       Lines.Strings = (
         'Memo1')
       TabOrder = 0
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 0
+    Top = 322
+    Width = 746
+    Height = 165
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Caption = 'Broadcast Message to Clients'
+    Constraints.MinHeight = 148
+    TabOrder = 2
+    DesignSize = (
+      746
+      165)
+    object btnBroadcastString: TButton
+      Left = 632
+      Top = 131
+      Width = 107
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Caption = 'Broadcast String'
+      TabOrder = 0
+      OnClick = btnBroadcastStringClick
+    end
+    object Memo2: TMemo
+      Left = 7
+      Top = 24
+      Width = 732
+      Height = 100
+      Anchors = [akLeft, akTop, akBottom]
+      Constraints.MinHeight = 83
+      Lines.Strings = (
+        'Memo2')
+      TabOrder = 1
+    end
+    object btnBroadcastJSON: TButton
+      Left = 511
+      Top = 131
+      Width = 107
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Caption = 'Broadcast JSON'
+      TabOrder = 2
+      OnClick = btnBroadcastJSONClick
     end
   end
   object mtUsers: TFDMemTable

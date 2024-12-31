@@ -22,6 +22,7 @@ object Form1: TForm1
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 824
     object Image1: TImage
       AlignWithMargins = True
       Left = 10
@@ -5230,6 +5231,7 @@ object Form1: TForm1
       Caption = 'Panel8'
       ShowCaption = False
       TabOrder = 0
+      ExplicitLeft = 584
       object lblRESTRequest4DelphiComponent: TLabel
         Left = 1
         Top = 1
@@ -5248,6 +5250,8 @@ object Form1: TForm1
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitWidth = 824
+    ExplicitHeight = 486
     object Splitter1: TSplitter
       Left = 0
       Top = 259
@@ -5267,6 +5271,8 @@ object Form1: TForm1
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitWidth = 824
+      ExplicitHeight = 219
       object Panel6: TPanel
         Left = 0
         Top = 0
@@ -5285,6 +5291,7 @@ object Form1: TForm1
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        ExplicitWidth = 824
         object lblStatusCode: TLabel
           AlignWithMargins = True
           Left = 822
@@ -5329,6 +5336,8 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitWidth = 824
+        ExplicitHeight = 197
         object TabSheet6: TTabSheet
           Caption = 'Body'
           ImageIndex = 1
@@ -5340,6 +5349,8 @@ object Form1: TForm1
             Align = alClient
             ScrollBars = ssVertical
             TabOrder = 0
+            ExplicitWidth = 816
+            ExplicitHeight = 167
           end
         end
       end
@@ -5352,6 +5363,7 @@ object Form1: TForm1
       Align = alTop
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitWidth = 824
       object Panel5: TPanel
         Left = 0
         Top = 0
@@ -5370,6 +5382,7 @@ object Form1: TForm1
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        ExplicitWidth = 824
       end
       object PageControl1: TPageControl
         Left = 0
@@ -5385,6 +5398,7 @@ object Form1: TForm1
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitWidth = 824
         object TabSheet1: TTabSheet
           Caption = 'Request'
           DesignSize = (
@@ -5408,6 +5422,7 @@ object Form1: TForm1
             EditLabel.Caption = 'PipeServer:'
             TabOrder = 0
             Text = ''
+            ExplicitWidth = 337
           end
           object edtPipeName: TLabeledEdit
             Left = 384
@@ -5420,6 +5435,7 @@ object Form1: TForm1
             EditLabel.Caption = 'PipeName:'
             TabOrder = 1
             Text = ''
+            ExplicitLeft = 378
           end
           object mmCustomBody: TMemo
             Left = 6
@@ -5432,11 +5448,12 @@ object Form1: TForm1
                 '{"name":"Vinicius","lastname":"Sanchez","email":"vinicius@fioril' +
                 'li.com.br"}')
             TabOrder = 2
+            ExplicitWidth = 717
           end
           object btnDELETE: TButton
             Left = 741
-            Top = 120
-            Width = 72
+            Top = 179
+            Width = 75
             Height = 25
             Anchors = [akTop, akRight]
             Caption = 'DELETE'
@@ -5445,8 +5462,8 @@ object Form1: TForm1
           end
           object btnPUT: TButton
             Left = 741
-            Top = 87
-            Width = 72
+            Top = 146
+            Width = 75
             Height = 25
             Anchors = [akTop, akRight]
             Caption = 'PUT'
@@ -5455,8 +5472,8 @@ object Form1: TForm1
           end
           object btnPOST: TButton
             Left = 741
-            Top = 56
-            Width = 72
+            Top = 115
+            Width = 75
             Height = 25
             Anchors = [akTop, akRight]
             Caption = 'POST'
@@ -5465,8 +5482,8 @@ object Form1: TForm1
           end
           object btnGET: TButton
             Left = 741
-            Top = 24
-            Width = 72
+            Top = 83
+            Width = 75
             Height = 25
             Anchors = [akTop, akRight]
             Caption = 'GET'
@@ -5484,6 +5501,25 @@ object Form1: TForm1
             EditLabel.Caption = 'Endpoint:'
             TabOrder = 7
             Text = ''
+            ExplicitWidth = 717
+          end
+          object btnConnect: TButton
+            Left = 741
+            Top = 23
+            Width = 75
+            Height = 25
+            Caption = 'Connect'
+            TabOrder = 8
+            OnClick = btnConnectClick
+          end
+          object btnDisConnect: TButton
+            Left = 741
+            Top = 52
+            Width = 75
+            Height = 25
+            Caption = 'Disconnect'
+            TabOrder = 9
+            OnClick = btnDisConnectClick
           end
         end
         object TabSheet2: TTabSheet
