@@ -546,6 +546,8 @@ begin
     FServerName := InitPipeClient(PAnsiChar(AnsiString(FNamedPipe)), @CallBack);
   if not FConnected then
     FConnected := ConnectPipeClient(20000);
+  if not FConnected then
+     raise Exception.Create(format('Unable to connect to pipe: %s, on: %s',[FNamedPipe, FServerName]));
   Result := Self;
 end;
 

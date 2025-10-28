@@ -5459,6 +5459,7 @@ object Form1: TForm1
             Caption = 'DELETE'
             TabOrder = 3
             OnClick = btnDELETEClick
+            ExplicitLeft = 735
           end
           object btnPUT: TButton
             Left = 741
@@ -5469,6 +5470,7 @@ object Form1: TForm1
             Caption = 'PUT'
             TabOrder = 4
             OnClick = btnPUTClick
+            ExplicitLeft = 735
           end
           object btnPOST: TButton
             Left = 741
@@ -5479,6 +5481,7 @@ object Form1: TForm1
             Caption = 'POST'
             TabOrder = 5
             OnClick = btnPOSTClick
+            ExplicitLeft = 735
           end
           object btnGET: TButton
             Left = 741
@@ -5489,6 +5492,7 @@ object Form1: TForm1
             Caption = 'GET'
             TabOrder = 6
             OnClick = btnGETClick
+            ExplicitLeft = 735
           end
           object edtEndpoint: TLabeledEdit
             Left = 6
